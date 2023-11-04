@@ -7,54 +7,51 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,
     initial-scale=1.0">
-    <title>Document</title>
+    <title>chat app</title>
 <head> 
 <body>
-    <h1>Count Page</h1>
-    <h2 id = "ct"></h2>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+    <input type="text" id="chat-message-input" size="100"><br>
+    <input type="button" value="Send" id="chat-message-submit">
 
     <script>
         var ws = new WebSocket('ws://127.0.0.1:8000/ws/Stest/')
 
         ws.onopen = function(){
             console.log('WebSocket connection open now .....')
-            ws.send('Hi, can we talk now?')
+           
         }
         ws.onmessage = function(event){
-            console.log("EVENT...", event)
             console.log('Message Received from Server .....',event.data)
-            console.log('Type of Event Data', typeof (event.data))
-            var data = JSON.parse(event.data)
-            console.log('Parsed Data', data)
-            console.log('Type of parse Data', typeof (data))
+            const data = JSON.parse(event.data)
+            console.log('Parsed Data..', data)
+            console.log('Type of Parsed data..', typeof(data))
+            console.log('message..', data.msg)
+            document.querySelector('#chat-log').value += (data.msg + '\n')
 
-            document.getElementById("ct").innerText = data.count
+            
         }
         ws.onerror = function(event){
             console.log('Error .....', event)
         }
         ws.onclose = function(event){
             console.log('WebSocket connection is closed .....', event)
-        }  
+        }; 
 
 
-{% comment %} Event handler {% endcomment %}
+        document.getElementById('chat-message-submit').onclick = function(event){
+            const messageInputDom = document.getElementById
+            ('chat-message-input')
+            const message = messageInputDom.value
+
+            ws.send(JSON.stringify({
+                'msg': message
+            }))
+            messageInputDom.value = ''
+        }
 
 
 
-        {% comment %} ws.addEventListener('open', (event) => {
-            console.log('WebSocket ic connected now....', event)
-            ws.send("he, can we talk now?")
-        })
-        ws.addEventListener('message', (event) => {
-            console.log('message is receive now ....', event)
-        })
-        ws.addEventListener('error', (event) => {
-            console.log('Error...', event)
-        })
-        ws.addEventListener('close', (event) => {
-            console.log('WebSocket ic closed now....', event)
-        }) {% endcomment %}
     </script>
 </body>     
 </html>  
