@@ -24,20 +24,20 @@
         {% comment %} var ws = new WebSocket('ws://127.0.0.1:8000/ws/Stest/') {% endcomment %}
         const groupName = JSON.parse(document.getElementById('group-name').textContent)
         console.log(groupName)
-        {% comment %} var ws = new WebSocket(
+        var ws = new WebSocket(
             'ws://' 
             + window.location.host 
             + '/ws/Stest/' 
             + groupName 
             + '/'
-        ) {% endcomment %}
-        var ws = new WebSocket(
+        )  
+        {% comment %} var ws = new WebSocket(
             'ws://' 
             + window.location.host 
             + '/ws/Atest/' 
             + groupName 
             + '/'
-        )
+        )  {% endcomment %}
         
         ws.onopen = function(){
             console.log('WebSocket connection open now .....')
@@ -49,7 +49,9 @@
             console.log('Parsed Data..', data)
             console.log('Type of Parsed data..', typeof(data))
             console.log('message..', data.msg)
-            document.querySelector('#chat-log').value += (data.msg + '\n')
+            console.log('Username..', data.user)
+            document.querySelector('#chat-log').value += (data.user + ':' 
+            + data.msg + '\n')
 
             
         }
