@@ -1,7 +1,9 @@
+import json
 from channels.consumer import AsyncConsumer, SyncConsumer
 from channels.exceptions import StopConsumer
 from asgiref.sync import async_to_sync
-
+from .models import Chat, Group
+from channels.db import database_sync_to_async
 
 
 class TestSyncConsumer(SyncConsumer):
@@ -26,6 +28,26 @@ class TestSyncConsumer(SyncConsumer):
     def websocket_receive(self, event):
         print('Message receive from clint...', event['text'])
         print('Type of Message receive from clint...', type(event['text']))
+        # convert data type str to dict
+        data = json.loads(event['text'])
+        # print converted data
+        print("Data...", data)
+        #  check datatype 
+        print("Type of Data...", type(data))
+        # print message 
+        print("Chat messages ...", data['msg'])
+        # Find group object
+        group = Group.objects.get(name = self.group_name)
+
+        #Create New Chat Object
+        chat = Chat(
+             content = data['msg'],
+             group = group
+        )
+        chat.save()
+
+
+
         async_to_sync(self.channel_layer.group_send)(self.group_name, {
             'type': 'chat.message',
             'message': event['text']
@@ -68,7 +90,7 @@ class TestAsyncConsumer(AsyncConsumer):
                 self.group_name,    
                 self.channel_name
                 )
-            self.send({
+            await self.send({
                 'type': 'websocket.accept'
             })
 
@@ -76,7 +98,25 @@ class TestAsyncConsumer(AsyncConsumer):
     async def websocket_receive(self, event):
             print('Message receive from clint...', event['text'])
             print('Type of Message receive from clint...', type(event['text']))
-            await  self.channel_layer.group_send('Friends', {
+             # convert data type str to dict
+            data = json.loads(event['text'])
+            # print converted data
+            print("Data...", data)
+            #  check datatype 
+            print("Type of Data...", type(data))
+            # print message 
+            print("Chat messages ...", data['msg'])
+            # Find Group object
+            group = await database_sync_to_async(Group.objects.get)(name = self.group_name)
+
+            #Create New Chat Object
+            chat = Chat(
+                content = data['msg'],
+                group = group
+            )
+            await database_sync_to_async(chat.save)()
+
+            await  self.channel_layer.group_send(self.group_name, {
                 'type': 'chat.message',
                 'message': event['text']
             })
