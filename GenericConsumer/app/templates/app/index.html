@@ -10,20 +10,58 @@
     <title>chat app</title>
 </head> 
 <body>
-    <h1>Count Page</h1>
-    <h2 id="ct"></h2>
+    <h1>Group Name: {{groupname}}</h1>
+    <textarea id="chat-log" cols="100" rows="20">
+        {% for chat in chats%}
+            {{chat.content}}
+        {% endfor %}
+    </textarea><br>
+    <input type="text" id="chat-message-input" size="100"><br>
+    <input type="button" value="Send" id="chat-message-submit">
+
+    {{groupname|json_script:"group-name"}}
+
 
     <script>
-        var ws = new WebSocket('ws://127.0.0.1:8000/ws/wscte/')
+        const groupName = JSON.parse(document.getElementById('group-name').textContent)
+        console.log(groupName)
+        var ws = new WebSocket(
+            'ws://'
+            + window.location.host 
+            + '/ws/awscte/'
+            + groupName 
+            + '/'
+        )
+        
+        {% comment %} var ws = new WebSocket('ws://127.0.0.1:8000/ws/wscte/') {% endcomment %}
         ws.onopen = function () {
             console.log('Websocket is Connected..')
-            ws.send("Hi, Message from Client")
+
         }
+
+
         ws.onmessage = function (event) {
             console.log("Message received from server..", event)
-            console.log(event.data)
-            document.getElementById("ct").innerText = event.data
+            const data = JSON.parse(event.data)
+            console.log(data.msg)
+            document.querySelector('#chat-log').value += (data.msg + '\n')
+
+        } 
+
+
+        ws.onclose = function () {
+            console.log('WebSocket Connected closed unexpectedly..')
         }
+        document.getElementById("chat-message-submit").onclick = function(event){
+            const messageInputDom = document.getElementById("chat-message-input")
+            const message = messageInputDom.value
+            ws.send(JSON.stringify({
+                'msg': message
+            }))
+            messageInputDom.value = ''
+        }
+
+
     </script>
 </body>     
 </html>  

@@ -7,6 +7,6 @@ websocket_urlpatterns = [
 
 
     # Real time Example path
-    path('ws/wscte/', consumers.MyWebsocketConsumer.as_asgi()),
-    path('ws/awscte/', consumers.MyAsyncWebsocketConsumer.as_asgi()),
+    path('ws/wscte/<str:groupname>/', consumers.MyWebsocketConsumer.as_asgi()),
+    path('ws/awscte/<str:groupname>/', consumers.MyAsyncWebsocketConsumer.as_asgi()),
 ]
